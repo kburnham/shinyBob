@@ -7,8 +7,10 @@ library(bobdylanr)
 library(forcats)
 library(stringr)
 library(SnowballC)
-lyrics <- bd_songs
 
+
+
+lyrics <- bd_songs
 ui <- fluidPage(
 
    # Application title
@@ -48,7 +50,9 @@ server <- function(input, output) {
       highlight_matches(song_name = matches()$Song[1], line_matches) %>% HTML()
     })
 
-    output$title <- renderUI({matches()$Song[1] %>%
+    output$title <- renderUI({
+     # if (nrow(matches() == 0)) return("")
+      matches()$Song[1] %>%
         as.character() %>%
         h2()})
 
