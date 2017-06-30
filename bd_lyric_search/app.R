@@ -19,13 +19,15 @@ ui <- fluidPage(
       sidebarPanel(
          textInput("search_text",
                      "Enter word(s) to search:"
-                   )
+                   ),
+         tableOutput("matches")
       ),
 
       # Show a plot of the generated distribution
       mainPanel(
-         uiOutput("lyrics"),
-         tableOutput("table")
+          uiOutput("title"),
+          uiOutput("lyrics")
+
       )
    )
 )
@@ -33,14 +35,23 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
 
-    #output$lyrics <- renderText("Hello")
-    output$lyrics <- renderUI({
-      if (input$search_text == "") return("")
+    matches <- reactive({
+      if (input$search_text == "") return(data.frame())
       matches <- find_bd_lyrics(input$search_text)
-      if (nrow(matches) == 0) return("No matches found")
-      line_matches <- find_line_matches(matches$Song[1], input$search_text)
-      highlight_matches(song_name = matches$Song[1], line_matches) %>% HTML()
-      })
+    })
+
+    output$matches <- renderTable({matches()})
+
+    output$lyrics <- renderUI({
+      if (nrow(matches()) == 0) return("No matches found")
+      line_matches <- find_line_matches(matches()$Song[1], input$search_text)
+      highlight_matches(song_name = matches()$Song[1], line_matches) %>% HTML()
+    })
+
+    output$title <- renderUI({matches()$Song[1] %>%
+        as.character() %>%
+        h2()})
+
 
 }
 
